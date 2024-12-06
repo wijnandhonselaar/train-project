@@ -1,24 +1,25 @@
 import machine
 import time
+import uasyncio as asyncio
+import random
 
 # Initialize motor pins
-motor_pwm = machine.PWM(machine.Pin(10), freq=1000)  # PWM on GPIO10
-# motor_pwm.freq(1000)  # Set frequency
-motor_in2 = machine.Pin(11, machine.Pin.OUT)  # IN2
+motor_pwm = machine.PWM(machine.Pin(18), freq=500)  # PWM on GPIO18 (IN1)
+motor_in2 = machine.Pin(19, machine.Pin.OUT)  # IN2
 
-def motor_start(speed=512, direction=1):
+def motor_control(direction=1, speed=512):
     """
     Start the motor with the specified speed and direction.
     Speed range: 0 (stopped) to 1023 (full speed).
     """
     if direction == 1:  # Forward
-        motor_pwm.duty(speed)  # Set PWM speed
         motor_in2.value(0)  # IN2 LOW
     else:  # Reverse
-        motor_pwm.duty(speed)  # Set PWM speed
         motor_in2.value(1)  # IN2 HIGH
-    print(f"Motor started with speed {speed}, direction {'forward' if direction == 1 else 'backward'}")
 
+    motor_pwm.duty(speed)  # Set PWM speed
+
+    print(f"Motor started with speed {speed}, direction {'forward' if direction == 1 else 'backward'}")
 
 def motor_stop():
     """
@@ -30,17 +31,15 @@ def motor_stop():
 
 try:
     while True:
-        motor_start(1023, 1)  # Start motor at 80% speed (0-1023)
-        time.sleep(2)  # Run for 5 seconds
+        # print("Motor running forward")/
+        motor_control(1, 720)
+        # asyncio.create_task(motor_control(624))
+        time.sleep(random.randrange(30, 90))  # Run for 5 seconds
 
+        # print("Motor stopping...")
         motor_stop()  # Stop the motor
-        time.sleep(1)  # Wait for 3 seconds before restarting
         
-        motor_start(1023, 0)  # Start motor at 80% speed (0-1023)
-        time.sleep(2)  # Run for 5 seconds
-
-        motor_stop()  # Stop the motor
-        time.sleep(1)  # Wait for 3 seconds before restarting
+        time.sleep(random.randrange(10, 30))  # Run for 5 seconds
 
 except KeyboardInterrupt:
     print("Program interrupted")
