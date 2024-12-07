@@ -9,26 +9,39 @@ class Motor:
         self.driver = driver
         self.task = None  # Async task for motor actuation
 
-    def start(self, direction=1, speed=512, duration=None):
+    def start(self, direction=1, speed=512):
         """
         Start the motor.
         :param direction: 1 for forward, 0 for reverse.
         :param speed: Speed of the motor (0-1023).
-        :param duration: Duration to run the motor in seconds (None for indefinite).
+        :param delay: Delay between increasing the speed to reach the specified speed.
         """
         if self.task and not self.task.done():
             self.task.cancel()  # Cancel any ongoing motor task
 
-        self.task = asyncio.create_task(self._run_motor(direction, speed, duration))
+        self.task = asyncio.create_task(self._run_motor(direction, speed))
 
-    async def _run_motor(self, direction, speed, duration):
+    def start_gradually(self, direction=1, speed=512, delay=100):
+        """
+        Start the motor.
+        :param direction: 1 for forward, 0 for reverse.
+        :param speed: Speed of the motor (0-1023).
+        :param delay: Delay between increasing the speed to reach the specified speed.
+        """
+        if self.task and not self.task.done():
+            self.task.cancel()  # Cancel any ongoing motor task
+
+        self.task = asyncio.create_task(self._run_motor(direction, speed, delay))
+
+    async def _run_motor(self, direction, speed, delay=None):
         """
         Internal coroutine to run the motor.
         """
-        await self.driver.actuate(direction, speed)
-        if duration is not None:
-            await asyncio.sleep(duration)
-            self.stop()
+
+        if delay is None:
+            await self.driver.actuate(direction, speed)
+        else:
+            await self.driver.gradualy_actuate(direction, speed, delay)
 
     def stop(self):
         """
