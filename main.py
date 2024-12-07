@@ -1,30 +1,32 @@
 import uasyncio as asyncio
-from drivers.L911N import L911N
-from motor import Motor
-import random
+# from drivers.L911N import L911N
+# from motor import Motor
+from networking import Networking
+
+# WiFi credentials
+SSID = "VODAFONE_2926"
+PASSWORD = "bikesbikesbikes"
 
 # Create a driver and a motor
-loc_a_driver = L911N(18, 19)
+# driver = L911N(18, 19)
 print("Driver created")
-locomotive_a = Motor(loc_a_driver)
+# motor = Motor(driver)
 print("Motor created")
+
+# Create a networking instance
+networking = Networking(SSID, PASSWORD)
 
 async def main():
     try:
-        # Start motor A forward at 70% speed for 5 seconds
-        locomotive_a.start(direction=1, speed=720, duration=5)
+        # Connect to WiFi
+        await networking.connect()
 
-        # Wait for all tasks to complete
-        await asyncio.sleep(random.randrange(30, 90))
-
-        # Stop both motors
-        locomotive_a.stop()
-
-        await asyncio.sleep(random.randrange(10, 30))
+        # Start listening for instructions
+        # await networking.listen(motor)
 
     except KeyboardInterrupt:
         print("Program interrupted")
-        locomotive_a.stop()
+        # motor.stop()
 
 # Run the main asyncio event loop
 asyncio.run(main())
