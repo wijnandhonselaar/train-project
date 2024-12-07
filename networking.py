@@ -1,6 +1,6 @@
 import network
 import uasyncio as asyncio
-from microdot import Microdot, Response
+from microdot import Microdot, Response, Request
 
 class Networking:
     def __init__(self, ssid, password):
@@ -22,37 +22,36 @@ class Networking:
 
         
         @app.get('/info')
-        async def handle_info_get(request):
+        async def handle_info(request):
             return Response(body="Motor info", status_code=200)
 
-        @app.post('/do')
-        async def handle_do_post(request):
-            try:
-                request_data = await request.json
-            except Exception as e:
-                print(f"Error parsing JSON: {e}")
-                return Response(body="Invalid JSON", status_code=400)
-            
-            stop = request_data.get('stop', None)
-
-            if stop != None:
-                print(f"Stopping the train")
-                motor.stop()
-                return Response(body="Motor stopped", status_code=200)
-            
-            direction = request_data.get('direction')
-            speed = request_data.get('speed')
-            duration = request_data.get('duration', None)
-            
-            print(f"Staring the train")
+        @app.get('/start')
+        async def handle_start(request):
+            direction = request.args.get('direction')
+            speed = request.args.get('speed')
 
             if direction is not None and speed is not None:
-                if duration is not None:
-                    motor.start(direction=int(direction), speed=int(speed), duration=int(duration))
-                else:
-                    motor.start(direction=int(direction), speed=int(speed))
+                motor.start(direction=int(direction), speed=int(speed))
                 return Response(body="Motor started", status_code=200)
             else:
                 return Response(body="Invalid parameters", status_code=400)
+
+        @app.get('/start_gradually')
+        async def handle_start(request):
+            direction = request.args.get('direction')
+            speed = request.args.get('speed')
+
+            if direction is not None and speed is not None:
+                motor.start_gradually(direction=int(direction), speed=int(speed), delay=500)
+                return Response(body="Motor started", status_code=200)
+            else:
+                return Response(body="Invalid parameters", status_code=400)
+
+        @app.get('/stop')
+        async def handle_stop(request):
+                motor.stop()
+                return Response(body="Motor stopped", status_code=200)
+    
+
 
         await app.start_server(host='0.0.0.0', port=80)
