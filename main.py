@@ -12,15 +12,23 @@ print("Motor created")
 async def main():
     try:
         # Start motor A forward at 70% speed for 5 seconds
-        locomotive_a.start(direction=1, speed=720, duration=5)
+        locomotive_a.start(direction=1, speed=350)
 
         # Wait for all tasks to complete
-        await asyncio.sleep(random.randrange(30, 90))
+        await asyncio.sleep(5)#random.randrange(30, 90))
 
         # Stop both motors
         locomotive_a.stop()
 
-        await asyncio.sleep(random.randrange(10, 30))
+        await asyncio.sleep(5)#random.randrange(10, 30))
+        # Start motor A forward at 70% speed for 5 seconds
+        locomotive_a.start(direction=1, speed=350)
+
+        # Wait for all tasks to complete
+        await asyncio.sleep(5)#random.randrange(30, 90))
+
+        # Stop both motors
+        locomotive_a.stop()
 
     except KeyboardInterrupt:
         print("Program interrupted")
