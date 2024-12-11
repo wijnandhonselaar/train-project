@@ -11,20 +11,35 @@ def index():
 def start():
     direction = request.args.get('direction', 1)
     speed = request.args.get('speed', 720)
-    ip = request.args.get('ip', '192.168.2.5')  # Get the IP address from the URL parameters
+    ip = request.args.get('ip', '192.168.2.6')  # Get the IP address from the URL parameters
 
     if ip:
-        url = f"http://{ip}/do"
-        payload = {
-            "direction": direction,
-            "speed": speed
-        }
+        url = f"http://{ip}/start?direction={direction}&speed={speed}"
         try:
-            response = requests.post(url, json=payload)
+            response = requests.get(url)
             if response.status_code == 200:
                 return jsonify(message="Motor started successfully", direction=direction, speed=speed)
             else:
-                return jsonify(message="Failed to start motor", status=response.status_code), response.status_code
+                return jsonify(message=response.text, status=response.status_code), response.status_code
+        except requests.exceptions.RequestException as e:
+            return jsonify(message="Request failed", error=str(e)), 500
+    else:
+        return jsonify(message="IP address not provided"), 400
+
+@app.route('/api/start_gradually', methods=['GET'])
+def start_gradually():
+    direction = request.args.get('direction', 1)
+    speed = request.args.get('speed', 720)
+    ip = request.args.get('ip', '192.168.2.6')  # Get the IP address from the URL parameters
+
+    if ip:
+        url = f"http://{ip}/start_gradually?direction={direction}&speed={speed}"
+        try:
+            response = requests.get(url)
+            if response.status_code == 200:
+                return jsonify(message="Motor started successfully", direction=direction, speed=speed)
+            else:
+                return jsonify(message=response.text, status=response.status_code), response.status_code
         except requests.exceptions.RequestException as e:
             return jsonify(message="Request failed", error=str(e)), 500
     else:
@@ -32,15 +47,13 @@ def start():
 
 @app.route('/api/stop', methods=['GET'])
 def stop():
-    ip = request.args.get('ip', '192.168.2.5')  # Get the IP address from the URL parameters
+    ip = request.args.get('ip', '192.168.2.6')  # Get the IP address from the URL parameters
 
     if ip:
-        url = f"http://{ip}/do"
-        payload = {
-            "stop": "stop"
-        }
+        url = f"http://{ip}/stop"
+        
         try:
-            response = requests.post(url, json=payload)
+            response = requests.get(url)
             if response.status_code == 200:
                 return jsonify(message="Motor stopped successfully")
             else:
@@ -52,7 +65,7 @@ def stop():
 
 @app.route('/api/switch/open', methods=['GET'])
 def open():
-    ip = request.args.get('ip', '192.168.2.5')  # Get the IP address from the URL parameters
+    ip = request.args.get('ip', '192.168.2.6')  # Get the IP address from the URL parameters
 
     if ip:
         url = f"http://{ip}/switch"
@@ -60,7 +73,7 @@ def open():
             "action": "open"
         }
         try:
-            response = requests.post(url, json=payload)
+            response = requests.get(url, json=payload)
             if response.status_code == 200:
                 return jsonify(message=response.text)
             else:
@@ -72,7 +85,7 @@ def open():
 
 @app.route('/api/switch/close', methods=['GET'])
 def close():
-    ip = request.args.get('ip', '192.168.2.5')  # Get the IP address from the URL parameters
+    ip = request.args.get('ip', '192.168.2.6')  # Get the IP address from the URL parameters
 
     if ip:
         url = f"http://{ip}/switch"
@@ -80,7 +93,7 @@ def close():
             "action": "close"
         }
         try:
-            response = requests.post(url, json=payload)
+            response = requests.get(url, json=payload)
             if response.status_code == 200:
                 return jsonify(message=response.text)
             else:

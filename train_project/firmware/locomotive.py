@@ -1,7 +1,7 @@
 import uasyncio as asyncio
 from drivers.L911N import L911N
-from motor import Motor
-from networking import Networking
+from models.motor import Motor
+from networking.locomotive_server import LocomotiveServer
 
 # WiFi credentials
 SSID = "VODAFONE_2926"
@@ -14,16 +14,16 @@ motor = Motor(driver)
 print("Motor created")
 
 # Create a networking instance
-networking = Networking(SSID, PASSWORD)
+server = LocomotiveServer(SSID, PASSWORD)
 
 async def main():
     motor.stop()
     try:
         # Connect to WiFi
-        await networking.connect()
+        await server.connect()
 
         # Start listening for instructions
-        await networking.listen(motor)
+        await server.listen(motor)
 
     except KeyboardInterrupt:
         print("Program interrupted")

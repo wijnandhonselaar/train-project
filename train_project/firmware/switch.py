@@ -1,7 +1,8 @@
 import uasyncio as asyncio
 from drivers.L928N import L928N
-from motor import Motor
-from networking import Networking
+from models.Switch import Switch
+from models.motor import Motor
+from networking.switch_server import SwitchServer
 
 # WiFi credentials
 SSID = "VODAFONE_2926"
@@ -12,27 +13,21 @@ driver = L928N(pwm_pin=18, in1_pin=19, in2_pin=21)
 print("Driver created")
 motor = Motor(driver)
 print("Motor created")
+switch = Switch(driver)
 
 # Create a networking instance
-# networking = Networking(SSID, PASSWORD)
+server = SwitchServer(SSID, PASSWORD)
 
 async def main():
     motor.stop()
     try:
-        motor.start(direction=1, speed=900)
-        await asyncio.sleep(0.3)
-        motor.stop()
-        
-        await asyncio.sleep(1)
-        motor.start(direction=0, speed=900
-        )
         await asyncio.sleep(0.3)
         motor.stop()
         # Connect to WiFi
-        # await networking.connect()
+        await server.connect()
 
-        # # Start listening for instructions
-        # await networking.listen(motor)
+        # Start listening for instructions
+        await server.listen(switch)
 
     except KeyboardInterrupt:
         print("Program interrupted")
