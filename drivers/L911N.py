@@ -11,7 +11,9 @@ class L911N(MotorDriver):
         :param frequency: PWM frequency.
         """
         self.pwm = machine.PWM(machine.Pin(pwm_pin), freq=frequency)
+        self.pwm.duty(0)
         self.direction = machine.Pin(direction_pin, machine.Pin.OUT)
+        self.direction.value(1)  # Set default direction
 
     async def actuate(self, direction, speed):
         """
