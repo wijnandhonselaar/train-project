@@ -16,11 +16,17 @@ print("Motor created")
 # Create a networking instance
 server = LocomotiveServer(SSID, PASSWORD)
 
-async def broadcast_address():
+async def broadcast_address(ip):
     import socket
     import json
+    
+    # Replace the last digit of the IP address with 255
+    ip_parts = ip.split('.')
+    ip_parts[-1] = '255'
+    broadcast_ip = '.'.join(ip_parts)
+    
     message = json.dumps({"id": 1, "type": "locomotive"})
-    broadcast_address = ('192.168.2.255', 37020)
+    broadcast_address = (broadcast_ip, 37020)
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
     while True:
@@ -31,10 +37,10 @@ async def main():
     motor.stop()
     try:
         # Connect to WiFi
-        await server.connect()
+        ip = await server.connect()
 
         # Start broadcasting address
-        asyncio.create_task(broadcast_address())
+        asyncio.create_task(broadcast_address(ip))
 
         # Start listening for instructions
         await server.listen(motor)

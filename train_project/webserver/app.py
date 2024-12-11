@@ -8,16 +8,29 @@ app = Flask(__name__)
 app.secret_key = 'train_manager_1'  # Set a secret key for session management
 listener_started = False  # Flag to ensure the listener starts only once
 last_broadcast = None  # Global variable to store the last broadcast message
+connected_devices = []  # List to store all connected devices
 
 def listen_for_broadcasts():
-    global last_broadcast
+    global connected_devices
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.bind(('', 37020))
     while True:
         data, addr = sock.recvfrom(1024)
         message = data.decode()
-        # Store the message and IP address in the global variable
-        last_broadcast = {"message": message, "ip": addr[0]}
+        device_info = {"message": message, "ip": addr[0]}
+        
+        # Parse the message to extract id and type
+        try:
+            import json
+            message_data = json.loads(message)
+            device_id = message_data.get("id")
+            device_type = message_data.get("type")
+            
+            # Check if the device already exists in the list
+            if not any(d['id'] == device_id and d['type'] == device_type for d in connected_devices):
+                connected_devices.append({"id": device_id, "type": device_type, "ip": addr[0]})
+        except json.JSONDecodeError:
+            pass
 
 @app.before_request
 def start_broadcast_listener():
@@ -30,7 +43,7 @@ def start_broadcast_listener():
 
 @app.route('/', methods=['GET'])
 def index():
-    return render_template('index.html', last_broadcast=last_broadcast)
+    return render_template('index.html', connected_devices=connected_devices)
 
 @app.route('/api/start', methods=['GET'])
 def start():
@@ -127,6 +140,12 @@ def close():
             return jsonify(message="Request failed", error=str(e)), 500
     else:
         return jsonify(message="IP address not provided"), 400
+
+@app.route('/api/clear_devices', methods=['POST'])
+def clear_devices():
+    global connected_devices
+    connected_devices = []
+    return jsonify(message="Connected devices cleared"), 200
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

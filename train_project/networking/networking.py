@@ -17,6 +17,7 @@ class Networking(INetworking):
         while not self.wlan.isconnected():
             await asyncio.sleep(1)
         print("Connected to WiFi:", self.wlan.ifconfig())
+        return self.wlan.ifconfig()[0]
 
     async def listen(self, device):
         pass  # This method will be overridden by subclasses
